@@ -5,33 +5,52 @@
 #include <limits>
 #include <stdexcept>
 #include <CGAL/Exact_predicates_exact_constructions_kernel.h>
+
 typedef CGAL::Exact_predicates_exact_constructions_kernel   EK;
 typedef EK::Point_2 P;
 typedef EK::Line_2 L;
 typedef EK::Ray_2 R;
+typedef EK::Direction_2 D;
+
 int INF = std::numeric_limits<int>::max();
 using namespace std;
 
 
 /*
-idea for a linear algo:
-Instead of computing, for each ray, the intersection with every other ray, we only compute the intersection with 4 rays:
-- low-start is the ray with the lowest starting y coordinate
-- up start ray is the ray with the biggest starting ray coordinate
-- low rate is the ray with the smallest slope
-- up rate is the ray with the biggest slope
+Idea for a linear algo.
+ONLY IN CASE OF UPGOING MOTOS
 
-The idea is to keep track of those 4 rays.
-When looping over each ray, we examine its intersection with each of those 4 rays to see if a ray has to be discarded (set to 1 in active vector)
-Then we check if this ray should be part of one of the 4 rays.
+The idea is to sort motos according to the slope rate in an array, and according to the starting point (y0) in another.
+We take the moto with the smallest slope and add it to list of forever going motos. 
+All motos with a smaller necessarily die.
+Then iterate, looking for the next moto that has the smallest slope and is above to the previous smallest slope moto.
+Until the moto with highest slope is checked.
 
-The solution is given by listing the active rays (0 in the vector)
+Problem: 
+I try to sort motoes according to different criteria in different arrays. 
+First motos are sorted according to starting point so that the member start_index of each moto can be set.
+Then motoes are sorted according to slope so that the member slope_index can be set.
+However, I noticed that the indices members are messed up.
+After being set in the first sorting, the start_index seems not to have been changed when I do the second sorting.
+So maybe the setting of start_date was done on a copy, but I dont see how its possible
 
-
-NO DOES NOT WORK
-
-linear idea in case of only upgoing motorcycles: sort starting points. set active lowest slope. iterate.
+Sort stucture according to 1 member value
+https://stackoverflow.com/questions/873715/c-sort-with-structs
+http://www.cplusplus.com/forum/general/97555/
+https://stackoverflow.com/questions/12662891/how-can-i-pass-a-member-function-where-a-free-function-is-expected
+https://stackoverflow.com/questions/50549611/slicing-a-vector-in-c
+https://stackoverflow.com/questions/11348376/std-vector-c-deep-or-shallow-copy
 */
+
+struct motorcycle {
+    long start;
+    double slope;
+    int start_index;
+    int slope_index;
+    int input_index;
+    R rayon;
+    bool active;
+};
 
 void print_vector(vector<int> active) {
     for (int i=0; i<active.size(); i++) {
@@ -40,27 +59,80 @@ void print_vector(vector<int> active) {
     cout << " \n";
 }
 
+bool sort_start(motorcycle const& m1, motorcycle const& m2) { // returns true if m1<m2
+    return m1.start < m2.start;
+}
+
+bool sort_slope(motorcycle const& m1, motorcycle const& m2) { // returns true if m1<m2
+    if (m1.slope != m2.slope) return m1.slope < m2.slope;
+    else return m1.start < m2.start;
+}
+
+bool sort_input(motorcycle const& m1, motorcycle const& m2) { // returns true if m1<m2
+    return m1.input_index < m2.input_index;
+}
+
 void ride_forever() {
 
     long n; 
     cin >> n;
-    vector<int> active(n, 0);
-    vector<R> lines(n);
+    vector<motorcycle> input_motos;
+    vector<motorcycle> slope_motos;
 
     // read direction of each biker
     long y0, x1, y1;
+    EK::RT slope;
+    D direction;
+    R rayon;
+
     for (int i=0; i<n; i++) {
         cin >> y0 >> x1 >> y1;
-        lines[i] = R(P(0, y0), P(x1, y1));
+        rayon = R(P(0, y0), P(x1, y1));
+        slope = rayon.direction().dy() / rayon.direction().dx();
+        input_motos.push_back({y0, CGAL::to_double(slope), i, i, i, rayon, false});
     }
 
     // sort starting points
-
-    
-
-    // print active bikers
+    std::sort(input_motos.begin(), input_motos.end(), sort_start);
     for (int i=0; i<n; i++) {
-        if (active[i] == 0) cout << i << " ";
+        motorcycle* m = &input_motos[i]; // if no pointer, will make copy -> non persistent change
+        (*m).start_index = i; 
+        //cout << "sort start " << " " << " " << (*m).input_index << " " << (*m).start_index << "\n";
+    }
+    
+    // sort slopes
+    std::sort(input_motos.begin(), input_motos.end(), sort_slope);
+    for (int i=0; i<n; i++) {
+        motorcycle* m = &input_motos[i]; // if no pointer, will make copy -> non persistent change
+        (*m).slope_index = i;
+        //cout << "sort slope " << " " << (*m).slope << " " << (*m).input_index << " " << (*m).start_index << " " << (*m).slope_index << "\n";
+    }
+    slope_motos = input_motos; // copy
+
+    // iterate over motos
+    int highest_start_treated = 0;
+    int i = 0;
+    while(highest_start_treated != n-1) {
+
+        motorcycle slowest_slope_moto = slope_motos[i];
+
+        if (slowest_slope_moto.start_index >= highest_start_treated) {
+            highest_start_treated = slowest_slope_moto.start_index;
+            slope_motos[i].active = true;
+        }
+
+        // cout << "debug " << i << " " << highest_start_treated << " " << slowest_slope_moto.input_index << " " <<
+        //     slowest_slope_moto.start_index << " " << slowest_slope_moto.slope_index << "\n"; 
+
+        i++;
+    }
+
+    // sort by input_index to satisfy output requirements
+    std::sort(slope_motos.begin(), slope_motos.end(), sort_input);
+
+    // printinput_motosikers
+    for (int i=0; i<n; i++) {
+        if (slope_motos[i].active) cout << slope_motos[i].input_index << " ";
     }
     cout << "\n";
 
