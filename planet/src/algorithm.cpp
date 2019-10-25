@@ -14,6 +14,7 @@
 after added only single loops, try one call to dijkstra, with master source
 https://stackoverflow.com/questions/30832309/multi-source-single-destination-algorithm
 also play with iterator indices :-)
+important: in most single vertices loops, not iterate on nscc planets but normal planets, or only k first
 */ 
 
 
