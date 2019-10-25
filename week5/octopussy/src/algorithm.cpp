@@ -23,6 +23,10 @@ problem was in line 72, was deactivating ball from the heap but not from the all
 Need to deactivate from the vector! (to check if brother deactivated)
 Explanation: queue::push et vector::push_back pushent des copies et pas des references.
 
+
+smart solution:
+https://github.com/JD-ETH/AlgoLab/blob/master/week2/Octopussy/src/Octopussy.cpp
+instead of hidden most urgent timer behind each node, compute time by which node must be visited so that nodes behind can be deactivated
 */
 
 using namespace std;

@@ -44,20 +44,13 @@ https://stackoverflow.com/questions/11348376/std-vector-c-deep-or-shallow-copy
 
 struct motorcycle {
     long start;
-    double slope;
+    EK::RT slope;
     int start_index;
     int slope_index;
     int input_index;
     R rayon;
     bool active;
 };
-
-void print_vector(vector<int> active) {
-    for (int i=0; i<active.size(); i++) {
-        cout << active[i] << " ";
-    }
-    cout << " \n";
-}
 
 bool sort_start(motorcycle const& m1, motorcycle const& m2) { // returns true if m1<m2
     return m1.start < m2.start;
@@ -89,7 +82,7 @@ void ride_forever() {
         cin >> y0 >> x1 >> y1;
         rayon = R(P(0, y0), P(x1, y1));
         slope = rayon.direction().dy() / rayon.direction().dx();
-        input_motos.push_back({y0, CGAL::to_double(slope), i, i, i, rayon, false});
+        input_motos.push_back({y0, slope, i, i, i, rayon, false});
     }
 
     // sort starting points
