@@ -8,16 +8,6 @@
 
 using namespace std;
 
-void printMatrix(vector<vector<int>> mat, int n) {
-
-    cout << endl;
-    for (int i = 0; i < n; ++i)
-    {
-        for (int j = 0; j < n; ++j)
-            cout << mat[i][j] << ' ';
-        cout << endl;
-    }
-}
 
 void best_gain_efficient(int n, int m, int k, vector<int> &coins) {
 
@@ -31,12 +21,12 @@ void best_gain_efficient(int n, int m, int k, vector<int> &coins) {
     }
 
     // lenght of 1
-    for (int i=0; i<n; i++) if (positions_1d[0]==0) gains[i][i] = coins[i];
+    if (positions_1d[0]==0) for (int i=0; i<n; i++) gains[i][i] = coins[i];
 
     // length of 2
     for (int i=0; i<n-1; i++) {
-        int j = i + 1;
-        if (positions_1d[1]==0) gains[i][j] = max(coins[i], coins[j]);
+        if (positions_1d[1]==0) gains[i][i+1] = max(coins[i], coins[i+1]);
+        else gains[i][i+1] = min(gains[i][i], gains[i+1][i+1]);
     }
 
     //fill gains 2d matrix
@@ -44,19 +34,15 @@ void best_gain_efficient(int n, int m, int k, vector<int> &coins) {
         for (int i=0; i<n-l+1; i++) {
             
             int j = i+l-1;
-            int position = positions_1d[l-1];
 
-            if (position == 0) {
-                int pickfirst = coins[i] + min(gains[i+2][j], gains[i+1][j-1]); 
-                int picklast =  coins[j] + min(gains[i+1][j-1], gains[i][j-2]);
+            if (positions_1d[l-1] == 0) {
+                int pickfirst = coins[i] + gains[i+1][j]; 
+                int picklast =  coins[j] + gains[i][j-1];
                 gains[i][j] = max(pickfirst, picklast);
-                            
             }
             else {
                 gains[i][j] = min(gains[i+1][j], gains[i][j-1]);
             }
-
-
         }
     }
     //printMatrix(gains, n);
