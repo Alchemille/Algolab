@@ -1,0 +1,5 @@
+**/build/
+*.sh
+*.txt
+*.in
+*.out
