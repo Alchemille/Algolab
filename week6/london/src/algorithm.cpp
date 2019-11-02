@@ -17,9 +17,6 @@ https://stackoverflow.com/questions/1939953/how-to-find-if-a-given-key-exists-in
 https://stackoverflow.com/questions/4324763/can-we-have-functions-inside-functions-in-c
 https://stackoverflow.com/questions/26281979/c-loop-through-map
 
-https://stackoverflow.com/questions/11984297/creating-pair-object-c
-https://stackoverflow.com/questions/10124679/what-happens-if-i-read-a-maps-value-where-the-key-does-not-exist
-
 Difficulties: 
 at first, had a different node for each input letter. third inner loop to create middle edges. 
 Now no third loop and less vertices
@@ -43,46 +40,41 @@ typedef boost::graph_traits<graph>::edge_iterator edge_iterator;
 
 using namespace std;
 
-class edge_adder {
-    graph &G;
+// function from slides.
+void add_edge(int from, int to, long capacity, graph& G) {
+    auto c_map = boost::get(boost::edge_capacity, G);
+    auto r_map = boost::get(boost::edge_reverse, G);
+    const auto e = boost::add_edge(from, to, G).first;
+    const auto rev_e = boost::add_edge(to, from, G).first;
+    c_map[e] = capacity;
+    c_map[rev_e] = 0; // reverse edge has no capacity!
+    r_map[e] = rev_e;
+    r_map[rev_e] = e;
+}
 
-    public:
-        explicit edge_adder(graph &G) : G(G) {}
-
-        void add_edge(int from, int to, long capacity) {
-            auto c_map = boost::get(boost::edge_capacity, G);
-            auto r_map = boost::get(boost::edge_reverse, G);
-            const auto e = boost::add_edge(from, to, G).first;
-            const auto rev_e = boost::add_edge(to, from, G).first;
-            c_map[e] = capacity;
-            c_map[rev_e] = 0; // reverse edge has no capacity!
-            r_map[e] = rev_e;
-            r_map[rev_e] = e;
-        }
-};
 void check_telegraph() {
 
     // read input. Use letter index for encoding letters instead of char.
-    int w, h, n, distinct_chars, u, v;
+    int w, h, n, distinct_chars, distinct_pairs, u, v;
     char a;
     cin >> h >> w;
     string str_note;
     cin >> str_note;
     n = str_note.length();
-    map<char, int> map_note; // map note character to node number in graph
-    map<char, int> occurences_note; // map note character to number of occurences in note
-    map<pair<char, char>, int> map_journal;
-    map<pair<char, char>, int> occurrences_journal;
+    unordered_map<char, int> map_note; // map note character to node number in graph
+    unordered_map<char, int> occurences_note; // map note character to number of occurences in note
+    unordered_map<char, int> map_journal;
+    unordered_map<char, int> occurrences_journal;
     vector<char> recto(h*w);
+    vector<char> verso(h*w);
 
     graph G(2);
-    edge_adder adder(G);
 
     // Count distinct characters in the note and save number of occurrences
     distinct_chars = 2;
     for (int i=0; i<n; i++) {
         if (map_note.count(str_note[i]) == 0) {
-            map_note[str_note[i]] = distinct_chars;
+            map_note[str_note[i]] = distinct_chars; // + 1 because node 0 is source
             distinct_chars ++;
             occurences_note[str_note[i]] = 0;
         }
@@ -90,46 +82,93 @@ void check_telegraph() {
     }
 
     // add edges from source to note
-    for (map<char, int>::iterator it = occurences_note.begin(); it!=occurences_note.end(); ++it) {
-        adder.add_edge(0, map_note[(*it).first], (*it).second);
+    for (auto it = occurences_note.begin(); it!=occurences_note.end(); ++it) {
+        add_edge(0, map_note[(*it).first], (*it).second, G);
     }
 
-    // Parse recto
+    // Count distinct characters in the note and save number of occurrences
     for (int i=0; i<h; i++) {
         for (int j=0; j<w; j++) {
             cin >> a;
+            if (map_journal.count(a) ==  0) {
+                map_journal[a] = distinct_chars;
+                distinct_chars ++;
+            }
             recto[i*w+j] = a;
         }
     }
 
-    // Parse verso and create node for every unique pair
     for (int i=0; i<h; i++) {
         for (int j=0; j<w; j++) {
             cin >> a;
-            u = min(a, recto[i*w+w-j-1]);
-            v = max(a, recto[i*w+w-j-1]);
-            if (map_journal.count(make_pair(u, v)) ==  0) {
-                map_journal[make_pair(u, v)] = distinct_chars;
+            if (map_journal.count(a) ==  0) {
+                map_journal[a] = distinct_chars;
                 distinct_chars ++;
-                occurrences_journal[make_pair(u, v)] = 0;
             }
-            occurrences_journal[make_pair(u, v)] ++;
+            verso[i*w+j] = a;
         }
     }
 
-    // edges from note to distinc pair
-    for (map<pair<char, char>, int>::iterator it = map_journal.begin(); it!=map_journal.end(); ++it) {
-        u = ((*it).first).first;
-        v = ((*it).first).second;
-        adder.add_edge(map_note[u], (*it).second, occurences_note[u]);
-        adder.add_edge(map_note[v], (*it).second, occurences_note[v]);
-        adder.add_edge((*it).second, 1, occurrences_journal[(*it).first]);
+    // edges from note to journal to its representant in journal
+    for (auto it = map_note.begin(); it!=map_note.end(); ++it) {
+        if (map_journal.count((*it).first) == 0) {
+            cout << "No\n";
+            return;
+        }
+        else {
+            u = (*it).second;
+            v = map_journal[(*it).first];
+            edge_desc e = boost::edge(0, u, G).first;
+            auto c = boost::get(boost::edge_capacity, G, boost::edge(0, u, G).first);
+            add_edge(u, v, c, G);
+        }
+    }
+
+    // edges from a journal node to its acolyte, from small to big (according to map_journal ordering)
+    auto cap_map = boost::get(boost::edge_capacity, G);
+    auto rev_map = boost::get(boost::edge_reverse, G);
+    edge_desc e;
+    bool s;
+    distinct_pairs = 0;
+    map<edge_desc, int> distinct_pairs_vertex;
+
+    for (int i=0; i<h; i++) {
+        for (int j=0; j<w; j++) {
+
+            int u = map_journal[recto[i*w+j]];
+            int v = map_journal[verso[i*w + w -j -1]];
+
+            boost::tie(e, s) = boost::edge(min(u, v), max(u, v), G);
+
+            if (s) {
+                //cout << "1 " << cap_map[e] << "\n";
+                cap_map[e] ++;
+                int added_vertex = distinct_pairs_vertex[e];
+                boost::tie(e, s) = boost::edge(max(u, v), added_vertex, G);
+                cap_map[e] ++;
+                boost::tie(e, s) = boost::edge(added_vertex, min(u, v), G);
+                cap_map[e] ++;                
+                boost::tie(e, s) = boost::edge(added_vertex, 1, G);
+                cap_map[e] ++;
+            }
+
+            else {
+                //cout << min(u, v) << "\n";
+                add_edge(min(u, v), max(u, v), 1, G);
+                add_edge(max(u, v), distinct_chars + distinct_pairs, 1, G);
+                add_edge(distinct_chars + distinct_pairs, min(u, v), 1, G);
+                add_edge(distinct_chars + distinct_pairs, 1, 1, G);
+                edge_desc e = boost::edge(min(u, v), max(u, v), G).first;
+                distinct_pairs_vertex[e] = distinct_chars + distinct_pairs;
+                distinct_pairs ++;
+            }
+        }
     }
 
     // edge_iterator eit1 = edges(G).first;
     // cout << "\n";
     // for (; eit1!=edges(G).second; ++eit1) {
-    //     cout << boost::get(boost::edge_capacity, G, *eit1) << " " << source(*eit1, G) << " " << target(*eit1, G) << "\n";
+    //     if (boost::get(boost::edge_capacity, G, *eit1) ) cout << boost::get(boost::edge_capacity, G, *eit1) << " " << source(*eit1, G) << " " << target(*eit1, G) << "\n";
     // }
     // cout << "\n";
 
