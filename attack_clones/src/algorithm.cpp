@@ -23,6 +23,14 @@ not use unordered map (iterator to sum needs to take segment in right order)
 Also not use vector of size m, would be too big.
 Sol : map or vector of pairs that is sorted by key.
 Directly computing sum does not seem possible. 
+For balise fermante, careful to decrement the next segment and use modulo !!!
+
+
+!!! Careful when enonce with intervals/sets !!!
+here, [a, b] includes segment a to segement b INCLUDED
+
+
+compute_n_jedi: Solution Louis does not require to resort for every overlapping jedi.
 */
 
 using namespace std;
@@ -33,9 +41,9 @@ bool compare_end(pair<int, int>& i1, pair<int, int>& i2) {
 };
 
 // Pour rester dans l'intevalle [0, m)
-int mod(int a, int b) { return (a + b) % b; }
+long mod(long a, long b) { return (a + b) % b; }
 
-void my_sort(vector<pair<int, int>> &jedi, int origin, int m) {
+void my_sort(vector<pair<int, int>> &jedi, long origin, long m) {
     for (auto &it : jedi) { // VERY COOL
         it.first = mod(it.first - origin, m); // ALSO COOLER
         it.second = mod(it.second - origin, m);
@@ -44,18 +52,18 @@ void my_sort(vector<pair<int, int>> &jedi, int origin, int m) {
     sort(jedi.begin(), jedi.end(), compare_end);
 }
 
-int compute_n_jedi(vector<pair<int, int>> jedi, pair<int, int> starting_int, int m) { // pass by copy since resort
+long compute_n_jedi(vector<pair<int, int>> jedi, pair<int, int> starting_int, long m) { // pass by copy since resort
     // apply interval scheduling with starting_jedi as origin
 
     // sort according to finish times in referential of starting_m
-    int origin = starting_int.first;
+    long origin = starting_int.first;
     my_sort(jedi, origin, m);
-    int current_jedi = 1;
-    int current_finish = starting_int.second;
+    long current_jedi = 1; // account for the segment we start with
+    long current_finish = mod(starting_int.second - origin, m); // recompute the end of the first segment jedi
     // apply interval scheduling
 
     for (vector<pair<int, int>>::iterator it=jedi.begin(); it!=jedi.end(); ++it) {
-        if ((*it).first > current_finish && (*it).second > (*it).first) {
+        if ((*it).first > current_finish && (*it).second >= (*it).first ) { // >= : there could be only 1 segment
             // add this jedi to army
             current_jedi ++;
             current_finish = (*it).second;
@@ -65,14 +73,15 @@ int compute_n_jedi(vector<pair<int, int>> jedi, pair<int, int> starting_int, int
 }
 
 
-int compute_n_jedi_no_overlap(vector<pair<int, int>>& jedi, int m) {
+long compute_n_jedi_no_overlap(vector<pair<int, int>>& jedi, long m) {
 
-    int current_jedi = 0, current_finish = 0;
+    long current_jedi = 0, current_finish = 0;
 
     for (vector<pair<int, int>>::iterator it=jedi.begin(); it!=jedi.end(); ++it) {
 
-        if ((*it).second > (*it).first && (*it).first != 0) { // not overlapping jedi int
-            if ((*it).first > current_finish && (*it).second > (*it).first) {
+        // importance of >= below: case with only 1 segemnt, so first = second
+        if ((*it).second >= (*it).first && (*it).first != 0 && (*it).second != 0) { // not overlapping jedi int
+            if ((*it).first > current_finish) {
                 // add this jedi to army
                 current_jedi ++;
                 current_finish = (*it).second;
@@ -83,7 +92,7 @@ int compute_n_jedi_no_overlap(vector<pair<int, int>>& jedi, int m) {
 }
 
 
-int find_interval(int n, int m, vector<pair<int, int>>& jedi) {
+long find_interval(long n, long m, vector<pair<int, int>>& jedi) {
     
     map<int, int> counter;
 
@@ -92,9 +101,9 @@ int find_interval(int n, int m, vector<pair<int, int>>& jedi) {
         counter[mod(it.second + 1, m)] --;
     }
 
-	int elected_interval = -1;
-	int min_k = n;
-	int k = 0;
+	long elected_interval = -1;
+	long min_k = n;
+	long k = 0;
 	for(auto it = counter.begin(); it != counter.end(); ++it) {
 		k += it->second;
 		if(k < min_k) {
@@ -108,7 +117,7 @@ int find_interval(int n, int m, vector<pair<int, int>>& jedi) {
 
 void attack() {
 
-    int u, v, n, m, chosen_int;
+    long u, v, n, m, chosen_int;
     cin >> n >> m;
 
     vector<std::pair<int, int>> jedi(n, {0, 0});
@@ -125,7 +134,7 @@ void attack() {
     my_sort(jedi, chosen_int, m);
 
     // apply interval scheduling over all possible chosen jedi
-    int n_army = 0, n_army_cand, n_cand = 0;
+    long n_army = 0, n_army_cand, n_cand = 0;
     int i = 0;
     for (vector<pair<int, int>>::iterator it = jedi.begin(); it!=jedi.end(); ++it) {
         if ((*it).second < (*it).first || (*it).first == 0) { // *it is a possible jedi for interval scheduling
