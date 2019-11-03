@@ -13,16 +13,8 @@ iterator: can use auto& it : vector, a bit like in java
 
 https://stackoverflow.com/questions/22387586/measuring-execution-time-of-a-function-in-c
 https://stackoverflow.com/questions/16772842/what-is-the-difference-between-cout-cerr-clog-of-iostream-header-in-c-when
-https://www.hackerrank.com/challenges/crush/problem
 
 mysort without custom modulo function was wrong. it - origin could be negative. Need to force it to be positive.
-
-!!! To determine segement with minimum overlapping jedi !!!
-If want to store compteur pour chaque balise and then sum the balises,
-not use unordered map (iterator to sum needs to take segment in right order)
-Also not use vector of size m, would be too big.
-Sol : map or vector of pairs that is sorted by key.
-Directly computing sum does not seem possible. 
 */
 
 using namespace std;
@@ -33,7 +25,7 @@ bool compare_end(pair<int, int>& i1, pair<int, int>& i2) {
 };
 
 // Pour rester dans l'intevalle [0, m)
-int mod(int a, int b) { return (a + b) % b; }
+int mod(int a, int b) { return (a % b + b) % b; }
 
 void my_sort(vector<pair<int, int>> &jedi, int origin, int m) {
     for (auto &it : jedi) { // VERY COOL
@@ -68,9 +60,7 @@ int compute_n_jedi(vector<pair<int, int>> jedi, pair<int, int> starting_int, int
 int compute_n_jedi_no_overlap(vector<pair<int, int>>& jedi, int m) {
 
     int current_jedi = 0, current_finish = 0;
-
     for (vector<pair<int, int>>::iterator it=jedi.begin(); it!=jedi.end(); ++it) {
-
         if ((*it).second > (*it).first && (*it).first != 0) { // not overlapping jedi int
             if ((*it).first > current_finish && (*it).second > (*it).first) {
                 // add this jedi to army
@@ -85,10 +75,10 @@ int compute_n_jedi_no_overlap(vector<pair<int, int>>& jedi, int m) {
 
 int find_interval(int n, int m, vector<pair<int, int>>& jedi) {
     
-    map<int, int> counter;
+    unordered_map<int, int> counter;
 
     for (auto &it : jedi) {
-        counter[mod(it.first, m)] ++;
+        counter[it.first] ++;
         counter[mod(it.second + 1, m)] --;
     }
 
@@ -104,7 +94,6 @@ int find_interval(int n, int m, vector<pair<int, int>>& jedi) {
 	}
     return elected_interval;
 }
-
 
 void attack() {
 
