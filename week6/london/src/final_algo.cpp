@@ -21,6 +21,10 @@ https://stackoverflow.com/questions/26281979/c-loop-through-map
 https://stackoverflow.com/questions/11984297/creating-pair-object-c
 https://stackoverflow.com/questions/10124679/what-happens-if-i-read-a-maps-value-where-the-key-does-not-exist
 
+https://stackoverflow.com/questions/11984297/creating-pair-object-c
+https://stackoverflow.com/questions/32685540/why-cant-i-compile-an-unordered-map-with-a-pair-as-key
+https://www.geeksforgeeks.org/map-vs-unordered_map-c/
+
 Difficulties: 
 at first, had a different node for each input letter. third inner loop to create middle edges. 
 Now no third loop and less vertices
@@ -35,7 +39,9 @@ Instead, have 1 node per letter.
 Tentative 4: Like 1 and 2 but no doublons nodes. Instead, count occurencies and use them for capacities
 
 Tentative 5: MAP is BAD, UNDORERED_MAP IS GOOD. .count() was too long, linear and not constant.
+Unordered map like python dictionary while map is a sel balancing BST
 PAIR IS NOT HASHABLE -> use boost::hash<par<char, char>> in definition of map.
+Use auto as type of iterator.
 
 Tentative Louis: Not use map map ASCII encoding for counting occurrences and getting vertex number
 

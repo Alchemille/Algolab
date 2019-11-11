@@ -43,7 +43,7 @@ void testcase1(int a, int b) {
     // output solution
     if (s.is_infeasible() || s.is_unbounded()) cout << "no\n";
     else {
-        int sol = floor(-CGAL::to_double(s.objective_value()));
+        int sol = floor(-CGAL::to_double(s.objective_value())); // not forget - to transform max to min !!!
         cout << sol << "\n";
     }
 

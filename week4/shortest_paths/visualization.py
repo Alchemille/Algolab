@@ -7,8 +7,8 @@ from subprocess import PIPE
 
 # # TODO: adapt the paths to the binary of your solution (the one that also outputs the list of edges on the shortest path)
 # # and to the input file (either lie.in, bern.in or nyc.in)
-binary_path = "/path/to/solution" # TODO
-filepath = "/path/to/lie.in" # TODO
+binary_path = "build/release/algo" # TODO
+filepath = "bern.in" # TODO
 
 # # TODO Uncomment the following three lines if you want to use the Google Maps images in the background
 # from PIL import Image, ImageTk
@@ -19,7 +19,7 @@ filepath = "/path/to/lie.in" # TODO
 use_gmaps = False # TODO
 # # TODO and request an API key from here (charges may apply!):
 # # https://developers.google.com/maps/documentation/static-maps/get-api-key
-api_key = "TODO" # TODO
+api_key = "AIzaSyAB1Vb9mMZn6aSCPCik9k_K1KUDTmIiv-E" # TODO
 # END OF THE TODOS
 
 # Global values of the visualization

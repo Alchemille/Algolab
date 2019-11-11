@@ -73,6 +73,29 @@ long compute_n_jedi(vector<pair<int, int>> jedi, pair<int, int> starting_int, lo
 }
 
 
+// int compute_n_jedi(vector<pair<int, int>> jedi, int selected_jedi, int m) {
+//     // sort according to finish times in referential of start
+//     // On n'a besoin de trier qu'une seule fois!
+// //    int origin = jedi[selected_jedi].first;
+// //    my_sort(jedi, origin, m);
+//     int num_jedi = 1;
+//     int current_finish = jedi[selected_jedi].second;
+//     // apply interval scheduling
+
+//     // On ne regarde que les jedis qui arrvent après le jedi sélectionné
+//     for (unsigned long i = selected_jedi + 1; i < jedi.size(); i++) {
+//         // Condition 2: soit le jedi sélectionné commence à 0, soit on s'arrête quand on atteint le début du jedi sélectionné
+//         if (jedi[i].first > current_finish &&
+//             (jedi[selected_jedi].first == 0 || jedi[i].first < jedi[selected_jedi].first) &&
+//             (jedi[selected_jedi].first == 0 || jedi[i].second < jedi[selected_jedi].first)) {
+//             // add this jedi to army
+//             num_jedi++;
+//             current_finish = jedi[i].second;
+//         }
+//     }
+//     return num_jedi;
+// }
+
 long compute_n_jedi_no_overlap(vector<pair<int, int>>& jedi, long m) {
 
     long current_jedi = 0, current_finish = 0;
@@ -138,7 +161,7 @@ void attack() {
     int i = 0;
     for (vector<pair<int, int>>::iterator it = jedi.begin(); it!=jedi.end(); ++it) {
         if ((*it).second < (*it).first || (*it).first == 0) { // *it is a possible jedi for interval scheduling
-            n_army_cand = compute_n_jedi(jedi, *it, m);
+            n_army_cand = compute_n_jedi(jedi, i, m);
             n_army = max(n_army, n_army_cand);
             n_cand ++;
         } 
