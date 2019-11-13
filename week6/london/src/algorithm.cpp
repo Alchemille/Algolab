@@ -64,7 +64,6 @@ void check_telegraph() {
     unordered_map<char, int> map_note; // map note character to node number in graph
     unordered_map<char, int> occurences_note; // map note character to number of occurences in note
     unordered_map<char, int> map_journal;
-    unordered_map<char, int> occurrences_journal;
     vector<char> recto(h*w);
     vector<char> verso(h*w);
 
@@ -74,7 +73,7 @@ void check_telegraph() {
     distinct_chars = 2;
     for (int i=0; i<n; i++) {
         if (map_note.count(str_note[i]) == 0) {
-            map_note[str_note[i]] = distinct_chars; // + 1 because node 0 is source
+            map_note[str_note[i]] = distinct_chars;
             distinct_chars ++;
             occurences_note[str_note[i]] = 0;
         }
