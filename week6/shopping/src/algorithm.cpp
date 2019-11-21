@@ -65,10 +65,11 @@ void shop() {
 
     long flow = boost::push_relabel_max_flow(G, 0, n);
     // cout << flow << "\n";
-
     // const auto c_map = boost::get(boost::edge_capacity, G);
     // const auto rc_map = boost::get(boost::edge_residual_capacity, G);
     // eit1 = edges(G).first;
+
+
     // cout << "\n";
     // for (; eit1!=edges(G).second; ++eit1) {
     //     cout << c_map[*eit1] - rc_map[*eit1] << " " <<

@@ -4,6 +4,8 @@
 #include <numeric>
 #include <limits>
 #include <stdexcept>
+#include <boost/multiprecision/cpp_int.hpp>
+
 // #include <CGAL/Exact_predicates_exact_constructions_kernel.h>
 
 // typedef CGAL::Exact_predicates_exact_constructions_kernel   EK;
@@ -14,12 +16,12 @@
 
 int INF = std::numeric_limits<int>::max();
 using namespace std;
-
+using namespace boost::multiprecision;
 
 struct motorcycle {
-    long y0;
-    long x1;
-    long y1;
+    int128_t y0;
+    int128_t x1;
+    int128_t y1;
     int start_index;
     int slope_index;
     int input_index;
@@ -27,21 +29,8 @@ struct motorcycle {
 };
 
 bool sort_start(motorcycle const& m1, motorcycle const& m2) { // returns true if m1<m2
-    return m1.y0 < m2.y1;
+    return m1.y0 < m2.y0;
 }
-
-// bool sort_slope(motorcycle const& m1, motorcycle const& m2) { // returns true if m1<m2
-//     if (m1.slope != m2.slope) return m1.slope < m2.slope;
-//     else return m1.start < m2.start;
-// }
-
-// bool sort_slope_abs(motorcycle const& m1, motorcycle const& m2) { // returns true if m1<m2
-//     if (abs(m1.slope) != abs(m2.slope)) return abs(m1.slope) < abs(m2.slope);
-//     // 3 cases where equal absolute slope
-//     else if (m1.slope >= 0 && m2.slope >= 0) return m1.start < m2.start;
-//     else if (m1.slope <= 0 && m2.slope <= 0) return m1.start > m2.start;
-//     else return m1.start < m2.start;
-// }
 
 bool sort_slope_abs(motorcycle const& m1, motorcycle const& m2) { // returns true if m1<m2
     if (abs(m1.y1 - m1.y0)*m2.x1 != abs(m2.y1 - m2.y0)*m1.x1) return abs(m1.y1 - m1.y0)*m2.x1 < abs(m2.y1 - m2.y0)*m1.x1;
@@ -61,7 +50,7 @@ void ride_forever() {
     vector<motorcycle> input_motos;
 
     // read direction of each biker
-    long y0, x1, y1;
+    int128_t y0, x1, y1;
 
     for (int i=0; i<n; i++) {
         cin >> y0 >> x1 >> y1;
@@ -83,6 +72,11 @@ void ride_forever() {
         (*m).slope_index = i;
         //cout << "sort slope " << " " << (*m).slope << " " << (*m).input_index << " " << (*m).start_index << " " << (*m).slope_index << "\n";
     }
+
+    for (auto it = input_motos.begin(); it != input_motos.end(); ++it) {
+        cout << (*it).input_index << " " << (*it).start_index << " " << (*it).slope_index << "\n";
+    }
+
 
     // iterate over motos
     int highest_start_treated = 0;
