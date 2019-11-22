@@ -12,7 +12,56 @@ idea for O(n) solution:
 Sliding window. Two pointers. Like slides week 1. 
 */
 
-void deck_cards(int n, int k, vector<int> &a) {
+void deck_cards_n(int n, int k, vector<int> &a) {
+
+    int i = 0;
+    int j = 0;
+    int best_i = 0;
+    int best_j = 0;
+    int best_sum = a[0];
+    int current_sum = a[0];
+
+    while(best_sum != k && j < n-1) {
+
+        //cout << current_sum << " " << best_sum << " " << best_i << " " << best_j << " " << i << " " << j << "\n";
+
+        if (k > current_sum) {
+            //cout << "cond 1\n";
+            j ++;
+            current_sum += a[j];
+            if (abs(k-current_sum) < abs(k-best_sum)) {
+                best_sum = current_sum;
+                best_j = j;
+                best_i = i;
+            }
+        }
+        else if (k < current_sum && i == j) {
+            //cout << "cond 2\n";
+            i++; j++;
+            current_sum = a[i];
+            if (abs(k-current_sum) < abs(k-best_sum)) {
+                best_sum = current_sum;
+                best_i = i;
+                best_j = j;
+            }
+        }
+        else if (k < current_sum) {
+            //cout << "cond 3\n";
+            current_sum -= a[i];
+            i ++;
+            if (abs(k-current_sum) < abs(k-best_sum)) {
+                best_sum = current_sum;
+                best_i = i;
+                best_j = j;
+            }
+        }
+    }
+
+    cout << best_i << " " << best_j << "\n";
+
+}
+
+void deck_cards_n2(int n, int k, vector<int> &a) {
 
     vector<vector<int>> partial_sums(n, vector<int>(n, 0));
 
@@ -70,7 +119,7 @@ int main(int argc, char const *argv[]) {
             cin >> a[i];
         }
 
-        deck_cards(n, k, a);
+        deck_cards_n(n, k, a);
     }
 
     return 0;
