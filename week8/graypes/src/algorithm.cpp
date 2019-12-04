@@ -52,7 +52,7 @@ void testcase(int n) {
 
     for (auto it = t.finite_edges_begin(); it != t.finite_edges_end(); ++it) {
 
-        K::FT dist = t.segment(it).squared_length();
+        K::FT dist = t.segment(it).squared_length(); // different than CGAL::squared_distance
         if (first) {
             distance = dist;
             first = false;
