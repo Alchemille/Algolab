@@ -11,6 +11,7 @@
 #include <boost/pending/disjoint_sets.hpp>
 #include <unordered_map>
 #include <queue>
+#include <assert.h>
 
 typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
 // we want to store an index with each vertex. Edges not represented explicitly.
@@ -22,28 +23,25 @@ typedef CGAL::Triangulation_data_structure_2<Vb,Fb>            Tds;
 typedef CGAL::Delaunay_triangulation_2<K,Tds>                  Delaunay;
 typedef K::Point_2                                             P;
 typedef std::tuple<Index,Index,K::FT>                          Edge;
-typedef Delaunay::Vertex_handle                           Vertex;
+typedef Delaunay::Vertex_handle                                Vertex;
 
 /*
-Strategie:
 First, compute Delaunay triangulaton and the mst.
 Then, for each mission, compute path from start to end of mission.
 Keep track of biggest edge on this path.
-Array of biggest edges allow to answer 3 questions.
+Array of biggest edges allow to answer 3 questions.\
 
 
-https://stackoverflow.com/questions/5813700/difference-between-size-t-and-stdsize-t
-A triangulation of n>=3 points has 3n-6 edges and 2n-4 faces
-define a tuple to represent an edge. Use of std::get
-Union Find part very important
-if use vector::push_back, do not initialize with a size! push_back increments the size !!
+tricks / traps:
+- K::FT a, b and not int a, b. Otherwise commparison with edges distance wont work
 */ 
 
 using namespace std;
 
 void testcase() {
 
-    int n, m, p;
+    long n, m;
+    double p;
     cin >> n >> m >> p;
 
     // Read and index jammers
@@ -67,7 +65,7 @@ void testcase() {
     Delaunay t;
     t.insert(jammers.begin(), jammers.end());
 
-    vector<Edge> edges(3*n); // upper bound of edges
+    vector<Edge> edges;
 
     for (auto it = t.finite_edges_begin(); it != t.finite_edges_end(); ++it) {
         int i1 = (*it).first->vertex(((*it).second + 1) % 3)->info();
@@ -82,108 +80,130 @@ void testcase() {
 	      return std::get<2>(e1) < std::get<2>(e2); // sort by length
             });
 
-    // implement Kruskal with union-find. Record mst with adjacency list
-    boost::disjoint_sets_with_storage<> uf(n);
-    Index n_components = n;
-    vector<vector<pair<int, K::FT>>> adj_list(n); // adjacency list for the mst
-    
+
+    // compute components with power consumption p
+    boost::disjoint_sets_with_storage<> ufp(n);
+
     for (vector<Edge>::iterator e = edges.begin(); e != edges.end(); ++e) {
-
-        // find representants of each edge endpoint
-        Index c1 = uf.find_set(std::get<0>(*e));
-        Index c2 = uf.find_set(std::get<1>(*e));
-
-        if (c1 != c2) {
-
-            // this edge connects two different components => part of the emst
-            uf.link(c1, c2);
-            adj_list[c1].push_back({c2, std::get<2>(*e)});
-            adj_list[c2].push_back({c1, std::get<2>(*e)});
-
-            if (--n_components == 1) break; // all the edges are linked
-        }
+        if (std::get<2>(*e) <= p) ufp.union_set(std::get<0>(*e), std::get<1>(*e));
     }
 
-    // for each mission, find closest Delaunay vertices to s and t, then part of mst to traverse
-    vector<K::FT> max_edges(m);
-    int i =0;
-    for (auto it = missions.begin(); it != missions.end(); ++it) {
 
-        P s = (*it).first; // start point   
-        P e = (*it).second; // end point
+    // // union find for p coverage. Not a MST
+    // boost::disjoint_sets_with_storage<> ufp(n);
+    Index n_components = n;
+    
+    // for (vector<Edge>::iterator e = edges.begin(); e != edges.end(); ++e) {
 
-        int v1 = t.nearest_vertex(s)->info();
-        int v2 = t.nearest_vertex(e)->info();
+    //     // find representants of each edge endpoint
+    //     Index c1 = ufp.find_set(std::get<0>(*e));
+    //     Index c2 = ufp.find_set(std::get<1>(*e));
+
+    //     if (std::get<2>(*e) > p) break;
+        
+    //     if (c1 != c2) { 
+    //         // this edge connects two different components => part of the emst
+    //         ufp.link(c1, c2); // same CC if distance lower than p
+    //         if (--n_components == 1) break; // all the edges are linked
+    //     }
+    // }
+
+    // answer first question: for each mission, check if s and t are in same CC of ufp
+    vector<K::FT> distances_st(m); // save max distance of (s, nearest) and (t, nearest) for each jammer
+    vector<bool> result_qu1(m, false);
+    for (int i = 0; i < m; i ++) {
+
+        P s = missions[i].first;
+        P e = missions[i].second;
 
         K::FT d1 = CGAL::squared_distance(s, t.nearest_vertex(s)->point()) * 4;
         K::FT d2 = CGAL::squared_distance(e, t.nearest_vertex(e)->point()) * 4;
         K::FT d = max(d1, d2);
+        distances_st[i] = d;
 
-        if (v1 != v2) {
+        int v1 = t.nearest_vertex(s)->info();
+        int v2 = t.nearest_vertex(e)->info();
 
-            // find mst path from v1 to v2, with simple BFS
-            queue<int> Q;
-            vector<bool> visited(n, false);
-            unordered_map<int, pair<int, K::FT>> predecessor;// (predecessor, distance)
-            Q.push(v1);
-            visited[v1] = true;
+        Index is = ufp.find_set(v1);
+        Index ie = ufp.find_set(v2);
 
-
-            while(!Q.empty()) {
-                int u = Q.front();
-                Q.pop();
-
-                // push and visit unvisited neighbors
-                for (auto it = adj_list[u].begin(); it != adj_list[u].end(); ++it) {
-                    
-                    int v = (*it).first;
-                    
-                    if (!visited[v]) {
-                        Q.push(v);
-                        predecessor[v] = {u, (*it).second};
-                        visited[v] = true;
-                        
-                        if (v == v2) break;
-                    }
-                }
-            }
-
-            // find longest edge on the path found in the mst
-            int pred = predecessor[v2].first;
-            d = max(d, predecessor[v2].second);
-
-            while (pred != v1) {
-                pred = predecessor[pred].first;
-                d = max(d, predecessor[pred].second);
-            }
+        if (is == ie && d <= p) {
+            cout << "y";
+            result_qu1[i] = true;
         }
+        else {
+            cout << "n";
+        }
+    }
+    cout << "\n";
 
-        // record max_edge for this mission
-        max_edges[i] = d;
-        i++;
+    // save interesting w values to answer qu2 and qu3. MST Kruskal consists in joining 2 CC when adding an edge.
+    // MST edges are the interesting w values.
+
+    boost::disjoint_sets_with_storage<> uf_mst(n);
+    n_components = n;
+    vector<Edge> mst_w(n); // list for the mst. Edges are sorted since sorting previously
+    
+    for (vector<Edge>::iterator e = edges.begin(); e != edges.end(); ++e) {
+
+        // find representants of each edge endpoint
+        Index c1 = uf_mst.find_set(std::get<0>(*e));
+        Index c2 = uf_mst.find_set(std::get<1>(*e));
+
+        if (c1 != c2) {
+
+            // this edge connects two different components => part of the emst
+            uf_mst.link(c1, c2);
+            mst_w.push_back(*e);
+            if (--n_components == 1) break; // all the edges are linked
+        }
     }
 
-    // qu.1
-    K::FT result_qu2 = 0;
-    K::FT result_qu3 = 0;
+    // iterate over mst_w and missions to answer to qu2 and qu3: for each mst_w, test if can accomplish the mission
+    K::FT a = 0;
+    K::FT b = 0;
 
-    for (auto it = max_edges.begin(); it != max_edges.end(); ++it) {
-        if ((*it) <= p) {
-            std::cout << "y";
-            result_qu3 = max(result_qu3, (*it));
+    for (int i = 0; i < m; i ++) {
+
+        // answer qu2: add mst edges from small to big until s and t in same CC
+        boost::disjoint_sets_with_storage<> ufa(n); // initialize ufa
+        boost::disjoint_sets_with_storage<> ufb(n); // initialize ufa
+
+        P s = missions[i].first;
+        P e = missions[i].second;
+
+        int v1 = t.nearest_vertex(s)->info();
+        int v2 = t.nearest_vertex(e)->info();
+
+        a = max(a, distances_st[i]);
+        if (result_qu1[i] == 1) b = max(b, distances_st[i]);
+        
+        for (vector<Edge>::iterator e = mst_w.begin(); e != mst_w.end(); ++e) { // add mst edge one by one
+
+            // stop for this mission if s and t in same CC. Distance of e is the smallest that makes this mission possible
+            Index is = ufa.find_set(v1); // CC for s
+            Index ie = ufa.find_set(v2); // CC for t
+            if (is == ie) {
+                break;
+            }
+
+            // continue joining CC otherwise: find representants of each edge endpoint
+            Index c1 = ufa.find_set(std::get<0>(*e));
+            Index c2 = ufa.find_set(std::get<1>(*e));
+
+            a = max(a, std::get<2>(*e));
+            if (result_qu1[i] == 1) b = max(b, std::get<2>(*e)); 
+
+            if (c1 != c2) ufa.link(c1, c2);
         }
-        else {std::cout << "n";}
-
-        result_qu2 = max(result_qu2, *it);
     }
-    std::cout << "\n";
-    std::cout << result_qu2 << "\n";
-    std::cout << result_qu3 << "\n";
 
+    cout << a << "\n" << b << "\n";
 }
 
 int main(int argc, char const *argv[]) {
     ios_base::sync_with_stdio(false);
+    std::cout << std::setiosflags(std::ios::fixed) << std::setprecision(0);    
     int t;
     cin >> t;
     while (t--) testcase();
