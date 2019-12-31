@@ -34,6 +34,8 @@ Array of biggest edges allow to answer 3 questions.\
 
 tricks / traps:
 - K::FT a, b and not int a, b. Otherwise commparison with edges distance wont work
+- Weird flags
+- regex to find first line of tests ^\d+ \d+ \d+$
 */ 
 
 using namespace std;
