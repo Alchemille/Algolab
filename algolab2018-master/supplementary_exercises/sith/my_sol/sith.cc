@@ -5,7 +5,6 @@
 
 typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
 typedef K::Point_2 P;
-
 typedef boost::disjoint_sets_with_storage<> UF;
 
 void testcase(){
@@ -35,11 +34,6 @@ void testcase(){
 				}
 			}
 		}
-	/*	
-		for(auto size: set_sizes)
-			std::cerr << size << " ";
-		std::cerr << "\n";
-	*/	
 	}
 	std::cout << best_size << "\n";
 }

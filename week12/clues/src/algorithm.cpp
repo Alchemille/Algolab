@@ -50,6 +50,8 @@ Doing it over triangulation after removing excessive edges, or over MST after re
 IF we do sanity check afterwards.
 Consist in recording in 2 other triangulations the vertices of each color,
 and check the minimal distance between 2 vertices of same color is large enough
+Here, do 2 coloring on each MST of a CC
+but could have done directly on triangulation of the CC, while ignoring too big edges (what correction does i think)
 
 second question:
 at first, wanted to add a and b to the CCs. Did not consider that signal goes to the closest station.

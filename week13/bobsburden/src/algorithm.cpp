@@ -12,7 +12,8 @@ using namespace std;
 
 /*
 http://www.enseignement.polytechnique.fr/informatique/INF478/docs/Cpp/en/cpp/container/set.html
-
+https://www.geeksforgeeks.org/dijkstras-shortest-path-algorithm-using-priority_queue-stl/
+https://www.geeksforgeeks.org/implement-min-heap-using-stl/
 
 2 sols :
 Use boost graphs and Dijskstra OR
