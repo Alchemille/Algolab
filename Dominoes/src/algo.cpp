@@ -19,7 +19,6 @@ int fall(int n, vector<int> a) {
             }
             else max_reach = i + a[i];
         }
-        else if (i > max_reach) break;
     }
 
     return max_reach;

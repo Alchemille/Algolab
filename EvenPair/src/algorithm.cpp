@@ -1,5 +1,12 @@
 #include <iostream>
+#include <vector>
 using namespace std;
+
+/*
+cool trick to compute number of partial sums that are odd and even in linear time:
+realize that parity(S(i, j) = parity(S(i) +/- S(j)))
+Hence enough to compute S(i) for all i and then use combinaisons
+*/
 
 unsigned nChoosek(unsigned n, unsigned k)
 {
@@ -15,7 +22,7 @@ unsigned nChoosek(unsigned n, unsigned k)
     return result;
 }
 
-int number_even_pairs(int n, vector& a) {
+int number_even_pairs(int n, vector<int>& a) {
 
     // compute partial sums
     vector<int> s(n, 0);

@@ -8,7 +8,9 @@
 using namespace std;
 
 /*
-THIS IDEA DOES NOT WORK. SEE sol0 and sol1.
+partial_sums: 
+ici, partial sums are diagonale block
+in sol1.cpp, are columns subsums.
 */
 
 void print_matrix(int n, vector<vector<long>> &a) {
@@ -20,13 +22,13 @@ void print_matrix(int n, vector<vector<long>> &a) {
     }
 }
 
-long nChoosek(int n, int k)
+int nChoosek(int n, int k)
 {
     if (k > n) return 0;
     if (k * 2 > n) k = n-k;
     if (k == 0) return 1;
 
-    long result = n;
+    int result = n;
     for( int i = 2; i <= k; ++i ) {
         result *= (n-i+1);
         result /= i;
@@ -40,8 +42,6 @@ int even_matrices(int n, vector<vector<long>> &a) {
 
     // compute partial sums over diagonal blocks (reduction to even pairs)
     vector<vector<long>> partial_sums(n, vector<long>(n, 0));
-    int O = 0;
-    int E = 0;
 
     // base case
     int sum_line = 0;
@@ -58,16 +58,42 @@ int even_matrices(int n, vector<vector<long>> &a) {
         }
     }
 
-    for (int i = 0; i < n; i ++) {
-        for (int j = 0; j < n; j ++) {
-            if (partial_sums[i][j] % 2 == 0) {
-                E ++;
+    //print_matrix(n, partial_sums);
+
+    int solution = 0;
+
+    for (int i1=0; i1<n; i1++) {
+        for (int i2=i1; i2<n; i2++) {
+
+            // i1 and i2 fixed. Use column partial sums to get sum for each col
+            // each col is like a single cell in the 1D case
+            int even = 0;
+            int odd = 0;
+
+            for (int col=0; col<n; col++) {
+
+                int sum_block;
+                if (i1 == 0) {
+                    sum_block = partial_sums[i2][col];
+                }
+                else sum_block = partial_sums[i2][col] - partial_sums[i1-1][col]; // donne un block!
+
+                if (sum_block % 2 == 0) even ++;
+                else odd ++;
+
             }
-            else O ++;
+
+            //cerr << i1 << " " << i2 << " " << even << " " << odd << "\n";
+
+            int sol_block = 0;
+            sol_block += nChoosek(even, 2); 
+            sol_block += nChoosek(odd, 2); 
+            sol_block += even;
+
+            solution += sol_block;
+
         }
     }
-
-    long solution = E + nChoosek(E, 2) + nChoosek(E, 2) * nChoosek(O, 2) + nChoosek(E, 4);
 
     return solution;
 }
