@@ -82,13 +82,12 @@ int main() {
     // at the point where the laser hits the obsticle
     bool hit_found = false;
     Segment lo_segment(laser_ray.source(), laser_ray.source());
-    int obst_index = 0; // used to jump over already checked segments in the second for-loop
+    //int obst_index = 0; // used to jump over already checked segments in the second for-loop
 
-    for(; obst_index < obsticale_count; ++obst_index) {
+    for(int obst_index = 0; obst_index < obsticale_count; ++obst_index) {
       if(do_intersect(obsticle_segments[obst_index], laser_ray)) {
         hit_found = true;
         laser_obsticale_segment(lo_segment, intersection(obsticle_segments[obst_index], laser_ray));
-        break;
       }
     }
 
@@ -96,12 +95,6 @@ int main() {
     if(!hit_found) {
       cout << "no" << endl;
       continue;
-    }
-
-    for(; obst_index < obsticale_count; ++obst_index) {
-      if(do_intersect(lo_segment, obsticle_segments[obst_index])) {
-        laser_obsticale_segment(lo_segment, intersection(obsticle_segments[obst_index], laser_ray));
-      }
     }
 
     cout << floor_to_double(lo_segment.target().x()) << " " << floor_to_double(lo_segment.target().y()) << endl;

@@ -10,6 +10,14 @@
 #include <boost/functional/hash.hpp>
 
 /*
+2e revue:
+Could have clean sliding window with i and j (relative positions)
+min heap useless, queue simpler
+even simple queue is useless since all to dequeue is current i
+begin by pushing j to get all elements.
+Then do while(j < n_positions) explore new word
+while (word at i redundant) push i
+
 Idea of algo
 Maintain both a map (word->position) of the latest position for each word, and a
 min heap (position, word) where the heap is based on the position.

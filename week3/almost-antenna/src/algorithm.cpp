@@ -53,12 +53,12 @@ void testcase(int n) {
 
     K::FT squared_result;
     Min_circle mc(people.begin(), people.end(), true);
-    Traits::Circle c = mc.circle();
-    squared_result = c.squared_radius();
+    squared_result = mc.circle().squared_radius();
 
     // try to remove every support point to improve squared_result
+    int cpt = 0;
     for (auto it = mc.support_points_begin(); it != mc.support_points_end(); ++it) {
-
+        cpt ++;
         P point_to_remove = *(it);
 
         for (int i = 0; i < n; i ++) {
@@ -66,15 +66,15 @@ void testcase(int n) {
             if (people[i] == point_to_remove) {
 
                 people[i] = people[(i == 0 ? 1 : i - 1)];
-                Traits::Circle cc = Min_circle(people.begin(), people.end(), true).circle();
-                squared_result = min(cc.squared_radius(), squared_result);
+                Min_circle mc(people.begin(), people.end(), true);
+                squared_result = min(mc.circle().squared_radius(), squared_result);
                 people[i] = point_to_remove;
 
                 break;
             }
         }
     }
-
+    cerr << cpt << "\n";
     cout << ceil_to_double(sqrt(squared_result)) << "\n";
 
 }
