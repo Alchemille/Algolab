@@ -6,10 +6,16 @@
 #include <stdexcept>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/max_cardinality_matching.hpp>
-
+#include <unordered_map>
+#include <boost/functional/hash.hpp>
 
 using namespace std;
 
+/*
+map::count is in linear time
+complexity of edmunds: in O(n.m) (n vertices, m edges)
+correction: sliding window, quite interesting
+*/
 
 typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS, boost::no_property,
     boost::property<boost::edge_weight_t, long>> graph;
@@ -22,37 +28,49 @@ typedef boost::property_map<graph, boost::edge_weight_t>::type weight_map_type;
 void max_cardinality_matching(long n, long c, long f) {
 
     // read caracteristics
+    // fill map (string -> vector of students having the stirng as char)
     vector<vector<string>> caracteristics(n, vector<string>(c));
+    unordered_map<string, vector<int>> char_to_studs;
+    string tmp;
     for (int i=0; i<n; i++) {
         for (int j=0; j<c; j++) {
-            cin >> caracteristics[i][j];
+            cin >> tmp;
+            char_to_studs[tmp].push_back(i);
+            caracteristics[i][j] = tmp;
         }
     }
 
-    //build graph suh that edge if at leat f caracteristics in common
+    // fill map (pair(stud1, stud2) -> number of characteristics in common)
+    unordered_map<pair<int, int>, int, boost::hash<pair<int, int>>> commons;
+    for (auto studs_1_char : char_to_studs) {
+
+        vector<int> students_1_characteristic = studs_1_char.second;
+
+        for (int i = 0; i < students_1_characteristic.size(); i ++) {
+            int stud1 = students_1_characteristic[i];
+            for (int j = i + 1; j < students_1_characteristic.size(); j ++) {
+                int stud2 = students_1_characteristic[j];
+                if (commons.count({stud1, stud2}) == 0) {
+                    commons[{stud1, stud2}] = 1;
+                }
+                else commons[{stud1, stud2}] ++;
+             }
+        }
+    }
+
     graph G(n);
-    for (int stud1=0; stud1<n; stud1++) {
-        for (int stud2=0; stud2<n; stud2++) {
-            if (stud1 != stud2) {
-                int common = 0;
-                for (vector<string>::iterator it1 = caracteristics[stud1].begin(); it1!=caracteristics[stud1].end(); ++it1) {
-                    for (vector<string>::iterator it2 = caracteristics[stud2].begin(); it2!=caracteristics[stud2].end(); ++it2) {
-                        if ((*it1).compare(*it2) == 0) {
-                            common ++;
-                        }                    
-                    }
-                }
-                // constraint on graph: sticly more than f common caracteristics to make an edge
-                if (common > f) {
-                    // add edge
-                    Vertex u = stud1;
-                    Vertex v = stud2;
-                    boost::add_edge(u, v, G);
-                }
-            }
+    for (auto paire_commons : commons) {
+
+        int stud1 = paire_commons.first.first;
+        int stud2 = paire_commons.first.second;
+
+        if (paire_commons.second > f) {
+            // add edge
+            boost::add_edge(stud1, stud2, G);
+
+            
         }
     }
-
 
     // define exterior property map to store maximum matching
     vector<Vertex> mate_map(n);

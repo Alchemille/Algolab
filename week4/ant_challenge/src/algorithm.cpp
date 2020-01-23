@@ -56,13 +56,12 @@ void find_route(long n, long e, long s, long a, long b) {
         
         for (; it != mst_species[i].end(); ++it) {
             
-            // add edge to G if weight less than current weight or does not exist in G
+            // add edge to G if weight less than current weight or does not exist in G. Important to add the edge as a G edge !
             edge_desc edge = *it;
             Vertex u = source(edge, vector_graph_species[i]);
             Vertex v = target(edge, vector_graph_species[i]);
             edge_desc edge_G = boost::edge(u, v, G).first;
 
-            cout << i << " " << weights_G[edge_G] << " " << weights_G[edge] <<  "\n";
             weights_G[edge_G] = min(weights_G[edge], weights_G[edge_G]);
             
         }

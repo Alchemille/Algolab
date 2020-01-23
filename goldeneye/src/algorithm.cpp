@@ -26,12 +26,6 @@ typedef std::tuple<Index,Index,K::FT>                          Edge;
 typedef Delaunay::Vertex_handle                                Vertex;
 
 /*
-First, compute Delaunay triangulaton and the mst.
-Then, for each mission, compute path from start to end of mission.
-Keep track of biggest edge on this path.
-Array of biggest edges allow to answer 3 questions.\
-
-
 tricks / traps:
 - K::FT a, b and not int a, b. Otherwise commparison with edges distance wont work
 - Weird flags
@@ -47,7 +41,7 @@ void testcase() {
     cin >> n >> m >> p;
 
     // Read and index jammers
-    std::vector<std::pair<P,Index>> jammers(n);
+    std::vector<std::pair<P,Index>> jammers;
     for (Index i = 0; i < n; i++) {
         int x, y;
         std::cin >> x >> y;
@@ -86,29 +80,13 @@ void testcase() {
     // compute components with power consumption p
     boost::disjoint_sets_with_storage<> ufp(n);
 
-    for (vector<Edge>::iterator e = edges.begin(); e != edges.end(); ++e) {
-        if (std::get<2>(*e) <= p) ufp.union_set(std::get<0>(*e), std::get<1>(*e));
+    for (vector<Edge>::iterator e = edges.begin(); e != edges.end() && std::get<2>(*e) <= p; ++e) {
+        ufp.union_set(std::get<0>(*e), std::get<1>(*e));
     }
-
 
     // // union find for p coverage. Not a MST
     // boost::disjoint_sets_with_storage<> ufp(n);
     Index n_components = n;
-    
-    // for (vector<Edge>::iterator e = edges.begin(); e != edges.end(); ++e) {
-
-    //     // find representants of each edge endpoint
-    //     Index c1 = ufp.find_set(std::get<0>(*e));
-    //     Index c2 = ufp.find_set(std::get<1>(*e));
-
-    //     if (std::get<2>(*e) > p) break;
-        
-    //     if (c1 != c2) { 
-    //         // this edge connects two different components => part of the emst
-    //         ufp.link(c1, c2); // same CC if distance lower than p
-    //         if (--n_components == 1) break; // all the edges are linked
-    //     }
-    // }
 
     // answer first question: for each mission, check if s and t are in same CC of ufp
     vector<K::FT> distances_st(m); // save max distance of (s, nearest) and (t, nearest) for each jammer
@@ -165,11 +143,14 @@ void testcase() {
     K::FT a = 0;
     K::FT b = 0;
 
-    for (int i = 0; i < m; i ++) {
+    // answer qu2: add mst edges from small to big until s and t in same CC
+    boost::disjoint_sets_with_storage<> ufa(n); // initialize ufa
+    boost::disjoint_sets_with_storage<> ufb(n); // initialize ufb
 
-        // answer qu2: add mst edges from small to big until s and t in same CC
-        boost::disjoint_sets_with_storage<> ufa(n); // initialize ufa
-        boost::disjoint_sets_with_storage<> ufb(n); // initialize ufa
+    vector<Edge>::iterator ea = mst_w.begin();
+    vector<Edge>::iterator eb = mst_w.begin();
+
+    for (int i = 0; i < m; i ++) {
 
         P s = missions[i].first;
         P e = missions[i].second;
@@ -179,24 +160,35 @@ void testcase() {
 
         a = max(a, distances_st[i]);
         if (result_qu1[i] == 1) b = max(b, distances_st[i]);
-        
-        for (vector<Edge>::iterator e = mst_w.begin(); e != mst_w.end(); ++e) { // add mst edge one by one
 
-            // stop for this mission if s and t in same CC. Distance of e is the smallest that makes this mission possible
+        for (; ea != mst_w.end(); ++ ea) {
             Index is = ufa.find_set(v1); // CC for s
             Index ie = ufa.find_set(v2); // CC for t
             if (is == ie) {
                 break;
             }
-
-            // continue joining CC otherwise: find representants of each edge endpoint
-            Index c1 = ufa.find_set(std::get<0>(*e));
-            Index c2 = ufa.find_set(std::get<1>(*e));
-
-            a = max(a, std::get<2>(*e));
-            if (result_qu1[i] == 1) b = max(b, std::get<2>(*e)); 
-
-            if (c1 != c2) ufa.link(c1, c2);
+            Index c1 = ufa.find_set(std::get<0>(*ea));
+            Index c2 = ufa.find_set(std::get<1>(*ea));
+            if (c1 != c2) {
+                a = max(a, std::get<2>(*ea));
+                ufa.link(c1, c2);
+            }
+            
+        }
+        if (result_qu1[i] == 1) {
+            for (; eb != mst_w.end(); ++ eb) {
+                Index is = ufb.find_set(v1); // CC for s
+                Index ie = ufb.find_set(v2); // CC for t
+                if (is == ie) {
+                    break;
+                }
+                Index c1 = ufb.find_set(std::get<0>(*eb));
+                Index c2 = ufb.find_set(std::get<1>(*eb));
+                if (c1 != c2) {
+                    b = max(b, std::get<2>(*eb));
+                    ufb.link(c1, c2);
+                }
+            }
         }
     }
 

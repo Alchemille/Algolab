@@ -16,6 +16,8 @@ https://stackoverflow.com/questions/3863282/checking-whether-a-vector-is-empty
 https://www.geeksforgeeks.org/stdremove-stdremove_if-c/
 https://en.wikipedia.org/wiki/Erase%E2%80%93remove_idiom
 https://stackoverflow.com/questions/347441/erasing-elements-from-a-vector
+
+Instead of storing decisions as vector of indices used, could have used vector of boolean of size n
 */
 
 void print_vector(vector<int>& v) {

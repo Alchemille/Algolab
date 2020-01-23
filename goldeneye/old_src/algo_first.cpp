@@ -41,7 +41,7 @@ void testcase() {
     cin >> n >> m >> p;
 
     // Read and index jammers
-    std::vector<std::pair<P,Index>> jammers(n);
+    std::vector<std::pair<P,Index>> jammers;
     for (Index i = 0; i < n; i++) {
         int x, y;
         std::cin >> x >> y;

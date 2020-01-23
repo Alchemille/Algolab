@@ -11,6 +11,7 @@
 
 /*
 To access to map of edge_index or vertex_index, add it to definition of graph in typedef
+Interesting: property edge_weight
 */
 
 using namespace boost;
