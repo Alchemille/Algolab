@@ -50,6 +50,18 @@ Will end up with vector of size 2*n
 + DP : child is subproblem of parent
 + propagation of info from parent to child in both solutions
 
+### light museum
+
++ DP for m = 1
++ algo split and list for m > 1. Was pretty streneous but it works! :D
++ sorted vector of vectors
++ used a lot i << n and & 
++ used lower_bound for binary search
++ algo bruteforce for m > 1:
+- interesting use of bit shifting for testing 2^subsets
+- int1 & int2 does boolean comparison
+- also use of dynamic bitsets 
+
 ### goldenEye
 
 + use K::FT when dealing with distances
