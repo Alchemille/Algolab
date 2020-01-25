@@ -83,6 +83,7 @@ Will end up with vector of size 2*n
 - also use of dynamic bitsets 
 
 ### motorcycles
+
 + when sorting, make sure its consistent
 + use K::RT to store slopes
 + slope = ray.direction().dy() / ray.direction().dx();
