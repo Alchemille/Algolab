@@ -7,6 +7,20 @@ Instead, read x and y separately
 + vector<int> v(n); v.push_back(x)
 Will end up with vector of size 2*n
 
+## week 3 CGAL
+
+### almost antenna 
+
++ Trick support points with minimum circle (at most 3)
+
+### first hit
+
++ if inter is segment, use colinear... to know how points are ordered
++ optimization to avoid checking all (ray, segment) intersections: maintain a target on the ray with
+(source, target) as small as possible and only check (opt segment, segment) intersection
+
+### from Russia with Love
+
 ## week 4
 
 ### first steps
@@ -30,6 +44,11 @@ Will end up with vector of size 2*n
 + use edmonds_maximum_cardinality_matching
 + sol2 (official) : sort interests of each student, then sliding window
 
+### chariot race
+
++ vicious triple DP
++ 2 recurrences work (mine and Afra's)
+
 ## week 5
 
 ### punch
@@ -44,6 +63,7 @@ Will end up with vector of size 2*n
 + used remove erase idiom 
 + vector insert
 + save DP decisions
++ TODO: get 100pts with split and list
 
 ### octopussy
 
@@ -61,6 +81,21 @@ Will end up with vector of size 2*n
 - interesting use of bit shifting for testing 2^subsets
 - int1 & int2 does boolean comparison
 - also use of dynamic bitsets 
+
+### motorcycles
+
++ when sorting, make sure its consistent
++ use K::RT to store slopes
++ slope = ray.direction().dy() / ray.direction().dx();
++ to make persistent change on vector of struct : 
+either do moto[i].prop = ... OR
+motorcycle* m = &input_motos[i];
+m.prop = ...
+BUT NOT
+motorcycle m = input_motos[i]; // COPY!
+m.prop = ...
++ use multiprecision int128_t with #include <boost/multiprecision/cpp_int.hpp>
+
 
 ### goldenEye
 

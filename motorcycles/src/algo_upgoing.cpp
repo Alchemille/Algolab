@@ -70,7 +70,6 @@ void ride_forever() {
     long n; 
     cin >> n;
     vector<motorcycle> input_motos;
-    vector<motorcycle> slope_motos;
 
     // read direction of each biker
     long y0, x1, y1;
@@ -88,44 +87,36 @@ void ride_forever() {
     // sort starting points
     std::sort(input_motos.begin(), input_motos.end(), sort_start);
     for (int i=0; i<n; i++) {
-        motorcycle* m = &input_motos[i]; // if no pointer, will make copy -> non persistent change
-        (*m).start_index = i; 
-        //cout << "sort start " << " " << " " << (*m).input_index << " " << (*m).start_index << "\n";
+        input_motos[i].start_index = i; 
     }
     
     // sort slopes
     std::sort(input_motos.begin(), input_motos.end(), sort_slope);
     for (int i=0; i<n; i++) {
-        motorcycle* m = &input_motos[i]; // if no pointer, will make copy -> non persistent change
-        (*m).slope_index = i;
-        //cout << "sort slope " << " " << (*m).slope << " " << (*m).input_index << " " << (*m).start_index << " " << (*m).slope_index << "\n";
+        input_motos[i].slope_index = i;
     }
-    slope_motos = input_motos; // copy
 
     // iterate over motos
     int highest_start_treated = 0;
     int i = 0;
     while(highest_start_treated != n-1) {
 
-        motorcycle slowest_slope_moto = slope_motos[i];
+        motorcycle slowest_slope_moto = input_motos[i];
 
         if (slowest_slope_moto.start_index >= highest_start_treated) {
             highest_start_treated = slowest_slope_moto.start_index;
-            slope_motos[i].active = true;
+            input_motos[i].active = true;
         }
-
-        // cout << "debug " << i << " " << highest_start_treated << " " << slowest_slope_moto.input_index << " " <<
-        //     slowest_slope_moto.start_index << " " << slowest_slope_moto.slope_index << "\n"; 
-
+        
         i++;
     }
 
     // sort by input_index to satisfy output requirements
-    std::sort(slope_motos.begin(), slope_motos.end(), sort_input);
+    std::sort(input_motos.begin(), input_motos.end(), sort_input);
 
     // printinput_motosikers
     for (int i=0; i<n; i++) {
-        if (slope_motos[i].active) cout << slope_motos[i].input_index << " ";
+        if (input_motos[i].active) cout << input_motos[i].input_index << " ";
     }
     cout << "\n";
 

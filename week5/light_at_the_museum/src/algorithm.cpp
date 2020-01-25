@@ -21,6 +21,8 @@ https://www.geeksforgeeks.org/c-boostdynamic_bitset-class-with-examples/
 
 interesting part with bitwise comparison and operators(&, <<). No need to convert to bitset to do bitwise comp.
 (1 & 2) returns 0
+
+Binary search: use of lowerbound : https://www.geeksforgeeks.org/lower_bound-in-cpp/
 */
 
 

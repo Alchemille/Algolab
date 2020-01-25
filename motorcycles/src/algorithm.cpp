@@ -30,10 +30,6 @@ struct motorcycle {
     bool active;
 };
 
-bool sort_start(motorcycle const& m1, motorcycle const& m2) { // returns true if m1<m2
-    return m1.y0 < m2.y0;
-}
-
 bool sort_slope_abs(motorcycle const& m1, motorcycle const& m2) { // returns true if m1<m2
     if (abs(m1.y1 - m1.y0)*m2.x1 != abs(m2.y1 - m2.y0)*m1.x1) return abs(m1.y1 - m1.y0)*m2.x1 < abs(m2.y1 - m2.y0)*m1.x1;
     else if (m1.y1 >= m1.y0 && m2.y1 >= m2.y0) return m1.y0 < m2.y0; // parallel upward
@@ -69,7 +65,7 @@ void ride_forever() {
     // iterate over motos
     int128_t highest_start_treated = input_motos[0].y0;
     int128_t lowest_start_treated = input_motos[0].y0;
-    int i = 0;
+    
     for (int i=0; i<n; i++) {
 
         motorcycle m = input_motos[i];
@@ -87,7 +83,6 @@ void ride_forever() {
         if (input_motos[i].active) cout << input_motos[i].input_index << " ";
     }
     cout << "\n";
-
 }
 
 int main(int argc, char const *argv[]) {
