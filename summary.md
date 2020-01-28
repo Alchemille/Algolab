@@ -7,6 +7,10 @@ Instead, read x and y separately
 + vector<int> v(n); v.push_back(x)
 Will end up with vector of size 2*n
 
+## week 1
+
+## week 2
+
 ## week 3 CGAL
 
 ### almost antenna 
@@ -21,7 +25,7 @@ Will end up with vector of size 2*n
 
 ### from Russia with Love
 
-## week 4
+## week 4 BGL
 
 ### first steps
 
@@ -95,6 +99,48 @@ motorcycle m = input_motos[i]; // COPY!
 m.prop = ...
 + use multiprecision int128_t with #include <boost/multiprecision/cpp_int.hpp>
 
+
+## week 6 flows
+
+For indexes, either use map and counter, or the provided structure,
+eg alphabet in London or the times in car sharing
+Sometimes source and sinks are part of the objects
+
+### cointossing
+
++ similar to football tournament in slides
+
+### london
+
++ sol1, at most 26 + 26 * 26 nodes: node for distinct pair. Pairs indexed with a map.
++ sol2, at most 26 + 26 * 26 nodes: use structure given by alphabet. Pairs indexed with ascii.
++ sol3, at most 26 + 26 nodes: Each letter of note represented once. For each pair, link min to max, and max to sink.
+
+### shopping
+
+### tetris
+
+### planet express
+
++ first idea use strong_components and dijkstra for all pairs
++ then use of strong_components and floyd_warshall from boost, better for all pairs
++ actually, only need all sources single destination paths, so dijkstra ok.
+can use master source trick since only interested in shortest path to single dest - dont care about the warehouse that allows the shortest path.
++ interesting methods: make_reverse_graph(G) and print_graph(G, get(prop, G))
+https://www.boost.org/doc/libs/1_48_0/libs/graph/doc/reverse_graph.html
+
+## week 7 LP
+
+### inball
+
+Like EPFL disopt
+
+### radiation
+
++ Use binary search over LP.
++ revelation tricky middle Binary Search
++ lp.set_r(constraint, CGAL::LARGER)
++ Gmpzf as IT and ET
 
 ### goldenEye
 

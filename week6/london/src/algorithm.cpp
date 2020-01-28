@@ -55,7 +55,7 @@ void add_edge(int from, int to, long capacity, graph& G) {
 void check_telegraph() {
 
     // read input. Use letter index for encoding letters instead of char.
-    int w, h, n, distinct_chars, distinct_pairs, u, v;
+    int w, h, n, distinct_chars, u, v;
     char a;
     cin >> h >> w;
     string str_note;
@@ -128,8 +128,6 @@ void check_telegraph() {
     auto rev_map = boost::get(boost::edge_reverse, G);
     edge_desc e;
     bool s;
-    distinct_pairs = 0;
-    map<edge_desc, int> distinct_pairs_vertex;
 
     for (int i=0; i<h; i++) {
         for (int j=0; j<w; j++) {
@@ -142,24 +140,14 @@ void check_telegraph() {
             if (s) {
                 //cout << "1 " << cap_map[e] << "\n";
                 cap_map[e] ++;
-                int added_vertex = distinct_pairs_vertex[e];
-                boost::tie(e, s) = boost::edge(max(u, v), added_vertex, G);
-                cap_map[e] ++;
-                boost::tie(e, s) = boost::edge(added_vertex, min(u, v), G);
-                cap_map[e] ++;                
-                boost::tie(e, s) = boost::edge(added_vertex, 1, G);
+                boost::tie(e, s) = boost::edge(max(u, v), 1, G);
                 cap_map[e] ++;
             }
 
             else {
                 //cout << min(u, v) << "\n";
                 add_edge(min(u, v), max(u, v), 1, G);
-                add_edge(max(u, v), distinct_chars + distinct_pairs, 1, G);
-                add_edge(distinct_chars + distinct_pairs, min(u, v), 1, G);
-                add_edge(distinct_chars + distinct_pairs, 1, 1, G);
-                edge_desc e = boost::edge(min(u, v), max(u, v), G).first;
-                distinct_pairs_vertex[e] = distinct_chars + distinct_pairs;
-                distinct_pairs ++;
+                add_edge(max(u, v), 1, 1, G);
             }
         }
     }
