@@ -72,7 +72,7 @@ void testcase() {
         cin >> weights[i];
     }
 
-    sort(strenghts.begin(), strenghts.end(), greater<int>());
+    sort(strenghts.begin(), strenghts.end(), greater<int>()); // sort in reverse order
     sort(weights.begin(), weights.end(), greater<int>());
 
     // check the work is doable and the heaviest box can be carried

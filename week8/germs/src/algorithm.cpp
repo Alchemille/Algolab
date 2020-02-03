@@ -39,11 +39,12 @@ We use info to index the vertices and store distance for each one.
 In correction, they actually store the dying_distance in info!
 IK::FT & info_g = v->info();
 Careful: Kernel with sqrt is super slow !
+Actually, there was not even need for Kernel_sqrt
 */
 
 int distance_to_time(K::FT const & d) {
-    EK::FT t_square = (CGAL::sqrt(d) - 1) / 2;
-    EK::FT t = CGAL::sqrt(t_square);
+    double t_square = (std::sqrt(d) - 1) / 2;
+    double t = std::sqrt(t_square);
     int result = ceil(CGAL::to_double(t));
     return result; 
 }

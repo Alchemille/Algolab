@@ -127,7 +127,7 @@ void testcase() {
     // try to make b smaller than 30
     while(b <= LIM && too_small(b, h, t, healthy, tumor)) {
         a = b + 1;
-        b *= 2;
+        b = min(LIM, b * 2 + 1);
     }
 
     while (a != b) {

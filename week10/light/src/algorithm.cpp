@@ -23,6 +23,14 @@ Now:
 Simply evaluate distance in double for loop. 
 If notice there are survivors, the winners must be survivors. Can stop the double for loop
 and use triangulation and nearest_vertex to just test if survives.
+
+Reason not use only triangulation and nearest_vertex : The nearest vertex could be not the killer.
+So if there is no survivor, the killing time could be wrong.
+but still worst case is n * m.
+
+Other sol: https://github.com/matalek/eth-algolab/blob/master/week_10/light_the_stage/light_the_stage.cc 
+or folder 2018:
+Use binary search
 */
 
 using namespace std;

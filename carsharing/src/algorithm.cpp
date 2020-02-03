@@ -60,9 +60,9 @@ We cant just add constant to each cost, otherwise we could have
 s1 -> s2 : -5 + 100 , 
 s2 -> s3 : - 5 + 100,  
 s1 -> s2 : -10 + 100 loses but should win
-We have to make sure the same amount of constants (10000 * 100) for example, is added to all units of flow.
-Key is to use the times! since there are 10000 times, the added weights are distributed easily
-Works because each path must use exactly 10000seconds !
+We have to make sure the same amount of constants (100000 * 100) for example, is added to all units of flow.
+Key is to use the times! since there are 100000 times, the added weights are distributed easily
+Works because each path must use exactly 100000seconds !
 
 Technical:
 https://www.geeksforgeeks.org/last-element-of-vector-in-cpp-accessing-and-updating/
@@ -82,7 +82,7 @@ struct request {
 
 void testcase() {
 
-    int n, s;
+    int n, s, K = 100;
     cin >> n >> s;
     vector<int> cars(s);
 
@@ -112,14 +112,15 @@ void testcase() {
 
     for (int i = 0; i < s; i ++) {
 
-        int num_duplicate_station = tmp_stations_times[i].size();
         sort(tmp_stations_times[i].begin(), tmp_stations_times[i].end());
         tmp_stations_times[i].erase(unique(tmp_stations_times[i].begin(), tmp_stations_times[i].end()), tmp_stations_times[i].end());
+        int num_duplicate_station = tmp_stations_times[i].size();
 
         for (int j = 0; j < num_duplicate_station; j ++) {
-            stations_times[i][stations_times[i][j]] = vertices_cpt + j;
+            stations_times[i][tmp_stations_times[i][j]] = vertices_cpt + j;
             if (j < num_duplicate_station - 1) {
-                adder.add_edge(vertices_cpt + j, vertices_cpt + j + 1, INT32_MAX, 0);
+                int time_int = tmp_stations_times[i][j + 1] - tmp_stations_times[i][j]; 
+                adder.add_edge(vertices_cpt + j, vertices_cpt + j + 1, INT32_MAX, K * time_int);
             }
         }
         vertices_cpt += num_duplicate_station;
@@ -130,8 +131,7 @@ void testcase() {
 
         int vertex_s = stations_times[query.start][query.departure];
         int vertex_t = stations_times[query.target][query.arrival];
-
-        adder.add_edge(vertex_s, vertex_t, 1, -query.profit);
+        adder.add_edge(vertex_s, vertex_t, 1, -query.profit + K * (query.arrival - query.departure));
     }
 
     // add car edges from source and sink edges
@@ -139,10 +139,10 @@ void testcase() {
     int sink = vertices_cpt ++;
 
     for (int i = 0; i < s; i ++) {
-        int source_station = stations_times[i][tmp_stations_times[i].back()];
-        int sink_station = stations_times[i][tmp_stations_times[i][0]];
-        adder.add_edge(source, source_station, cars[i], 0);
-        adder.add_edge(sink_station, sink, INT32_MAX, 0);
+        int source_station = stations_times[i][tmp_stations_times[i][0]];
+        int sink_station = stations_times[i][tmp_stations_times[i].back()];
+        adder.add_edge(source, source_station, cars[i], K * tmp_stations_times[i][0]);
+        adder.add_edge(sink_station, sink, INT32_MAX, K * (100000 - tmp_stations_times[i].back()));
     }
 
     // compute min cost max flow
@@ -150,18 +150,15 @@ void testcase() {
     auto r_map = boost::get(boost::edge_reverse, G);
     auto rc_map = boost::get(boost::edge_residual_capacity, G);
 
-    int flow = boost::push_relabel_max_flow(G, source, sink);
-    boost::cycle_canceling(G);
+    boost::successive_shortest_path_nonnegative_weights(G, source, sink);
     int cost = boost::find_flow_cost(G);
+    long flow = 0;
+    for (auto it = boost::out_edges(source, G).first; it != boost::out_edges(source, G).second; ++it) {
+         flow += c_map[*it] - rc_map[*it];
+    }
+    cost = -(cost - flow * K * 100000);
+    cout << cost << "\n";
 
-    // boost::successive_shortest_path_nonnegative_weights(G, source, sink);
-    // int cost = boost::find_flow_cost(G);
-    // long flow = 0;
-    // for (auto it = boost::out_edges(source, G).first; it != boost::out_edges(source, G).second; ++it) {
-    //     flow += c_map[*it] - rc_map[*it];
-    // }
-
-    cout << cost << " " << flow << "\n";
 }
 
 int main(int argc, char const *argv[]) {
